@@ -30,27 +30,57 @@ exports.createUser = (data, callback) => {
 };
 
 exports.getAllUsers = (callback) => {
-    db.query('SELECT id, nip, nama, email, role_id, password, photo FROM users', callback);
+  const query = `
+    SELECT users.id, users.nip, users.nama, users.email,
+           users.password, users.photo, roles.name AS role
+    FROM users
+    JOIN roles ON users.role_id = roles.id
+  `;
+  db.query(query, callback);
 };
 
 exports.getUserById = (id, callback) => {
-    db.query('SELECT id, nip, nama, email, role_id, password, photo FROM users WHERE id = ?', [id], callback);
+  db.query(
+    `SELECT 
+        users.id, users.nip, users.nama, users.email, users.role_id,
+        users.password, users.photo, users.no_telp, users.fakultas, users.jurusan,
+        roles.name AS role
+     FROM users
+     JOIN roles ON users.role_id = roles.id
+     WHERE users.id = ?`,
+    [id],
+    callback
+  );
 };
 
 exports.updateUser = (id, data, callback) => {
-    const query = `UPDATE users SET nip = ?, nama = ?, email = ?, role_id = ?, photo = ? WHERE id = ?`;
-    db.query(query, [data.nip, data.nama, data.email, data.role, data.photo, id], callback);
+  const query = `
+    UPDATE users SET 
+      nip = ?, nama = ?, email = ?, no_telp = ?, fakultas = ?, jurusan = ?
+    WHERE id = ?
+  `;
+  const values = [
+    data.nip, data.nama, data.email,
+    data.no_telp, data.fakultas, data.jurusan,
+    id
+  ];
+  db.query(query, values, callback);
 };
 
 exports.updateUserWithoutPhoto = (id, data, callback) => {
-    const query = `UPDATE users SET nip = ?, nama = ?, email = ?, role_id = ? password = ? WHERE id = ?`;
-    db.query(query, [data.nip, data.nama, data.email, data.role, data.password, id], callback);
+  const query = `UPDATE users SET nip = ?, nama = ?, email = ?, role_id = ? password = ? WHERE id = ?`;
+  db.query(query, [data.nip, data.nama, data.email, data.role, data.password, id], callback);
 };
 
 exports.deleteUser = (id, callback) => {
-    db.query('DELETE FROM users WHERE id = ?', [id], callback);
+  db.query('DELETE FROM users WHERE id = ?', [id], callback);
+};
+
+exports.updateUserPhoto = (id, photo, callback) => {
+  const query = "UPDATE users SET photo = ? WHERE id = ?";
+  db.query(query, [photo, id], callback);
 };
 
 exports.customQuery = (query, values, callback) => {
-    db.query(query, values, callback);
+  db.query(query, values, callback);
 };

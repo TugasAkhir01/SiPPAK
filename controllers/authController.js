@@ -31,7 +31,8 @@ exports.login = (req, res) => {
                 nip: user.nip,
                 nama: user.nama,
                 email: user.email,
-                role: user.role_id
+                role: user.role_name,
+                photo: user.photo
             }
         });
     });

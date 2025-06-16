@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
+const fs = require("fs");
+const path = require("path");
 
 exports.getUsers = (req, res) => {
     User.getAllUsers((err, results) => {
@@ -38,7 +40,7 @@ exports.register = (req, res) => {
 
         User.createUser(newUser, (err, result) => {
             if (err) return res.status(500).json({ error: err.message });
-            res.status(201).json({ 
+            res.status(201).json({
                 message: 'User registered successfully',
                 register: newUser,
             });
@@ -48,13 +50,71 @@ exports.register = (req, res) => {
 
 exports.updateUser = (req, res) => {
     const id = req.params.id;
-    const { nip, nama, email, role_id, photo } = req.body;
+    const { nip, nama, email, no_telp, fakultas, jurusan } = req.body;
 
-    const userData = { nip, nama, email, role_id, photo };
+    const userData = { nip, nama, email, no_telp, fakultas, jurusan };
+
     User.updateUser(id, userData, (err) => {
         if (err) return res.status(500).json({ message: 'Gagal update user', error: err });
         res.json({ message: 'User berhasil diupdate' });
     });
+};
+
+exports.updateUserPhoto = (req, res) => {
+    const id = req.params.id;
+    const photo = req.file ? req.file.filename : null;
+    if (!photo) return res.status(400).json({ message: 'Foto tidak ditemukan.' });
+
+    // Ambil foto lama
+    const db = require('../config/db');
+    db.query("SELECT photo FROM users WHERE id = ?", [id], (err, results) => {
+        if (err) return res.status(500).json({ message: 'Gagal ambil user', error: err });
+
+        // Hapus foto lama jika ada
+        if (results.length > 0 && results[0].photo) {
+            const fs = require("fs");
+            const path = require("path");
+            const oldPath = path.join(__dirname, "..", "uploads", "profile", results[0].photo);
+            fs.unlink(oldPath, (err) => {
+                if (err) console.warn("Gagal hapus foto lama:", err.message);
+            });
+        }
+
+        // Update via model
+        User.updateUserPhoto(id, photo, (err) => {
+            if (err) return res.status(500).json({ message: 'Gagal update foto', error: err });
+            res.json({ message: 'Foto berhasil diperbarui', updatedPhoto: photo });
+        });
+    });
+};
+
+exports.addUserManagement = async (req, res) => {
+    let { nip, nama, email, password, role_id, fakultas, jurusan, no_telp } = req.body;
+
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const userData = {
+            nip,
+            nama,
+            email,
+            password: hashedPassword,
+            role_id,
+            fakultas: fakultas || '',
+            jurusan: jurusan || '',
+            no_telp: no_telp || '',
+        };
+
+        User.createUser(userData, (err, result) => {
+            if (err) return res.status(500).json({ message: 'Gagal menambah user', error: err });
+
+            res.status(201).json({
+                message: 'User berhasil ditambahkan',
+                newUser: userData,
+            });
+        });
+    } catch (error) {
+        return res.status(500).json({ message: 'Gagal hashing password', error });
+    }
 };
 
 exports.updateUserManagement = async (req, res) => {
@@ -95,12 +155,10 @@ exports.deleteUser = (req, res) => {
     const id = req.params.id;
     User.deleteUser(id, (err) => {
         if (err) return res.status(500).json({ message: 'Gagal menghapus user', error: err });
-        res.json({ message: 'User berhasil dihapus',
+        res.json({
+            message: 'User berhasil dihapus',
             deleteUser: id
-         });
+        });
     });
 };
 
-exports.customQuery = (query, values, callback) => {
-    db.query(query, values, callback);
-};

@@ -44,8 +44,9 @@ exports.create = async (mahasiswa, pelanggaran) => {
     }
 
     await db.promise().query(
-        `INSERT INTO violations (mahasiswa_id, id_kasus, jenis_kasus, status, hasil_sidang, notulensi)
-         VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO violations 
+        (mahasiswa_id, id_kasus, jenis_kasus, status, hasil_sidang, notulensi, foto, deskripsi)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
             mahasiswaId,
             pelanggaran.id_kasus,
@@ -53,6 +54,8 @@ exports.create = async (mahasiswa, pelanggaran) => {
             pelanggaran.status,
             pelanggaran.hasil_sidang,
             pelanggaran.notulensi,
+            pelanggaran.foto || null,
+            pelanggaran.deskripsi || null
         ]
     );
 
@@ -60,7 +63,28 @@ exports.create = async (mahasiswa, pelanggaran) => {
 };
 
 exports.update = (id, data, cb) => {
-    db.query('UPDATE violations SET ? WHERE id = ?', [data, id], cb);
+    const allowedFields = [
+        "id_kasus", "jenis_kasus", "status", "hasil_sidang", "notulensi", "foto", "deskripsi"
+    ];
+
+    const updates = [];
+    const values = [];
+
+    for (const key of allowedFields) {
+        if (data[key] !== undefined) {
+            updates.push(`${key} = ?`);
+            values.push(data[key]);
+        }
+    }
+
+    if (updates.length === 0) {
+        return cb(null, { message: "Tidak ada field yang diupdate." });
+    }
+
+    values.push(id);
+
+    const sql = `UPDATE violations SET ${updates.join(', ')} WHERE id = ?`;
+    db.query(sql, values, cb);
 };
 
 exports.delete = (id, cb) => {
@@ -68,16 +92,16 @@ exports.delete = (id, cb) => {
 };
 
 exports.getViolationsByDate = async (start, end) => {
-  let query = 'SELECT * FROM violations';
-  let params = [];
+    let query = 'SELECT * FROM violations';
+    let params = [];
 
-  if (start && end) {
-    query += ' WHERE DATE(created_at) BETWEEN ? AND ?';
-    params.push(start, end);
-  }
+    if (start && end) {
+        query += ' WHERE DATE(created_at) BETWEEN ? AND ?';
+        params.push(start, end);
+    }
 
-  query += ' ORDER BY created_at DESC LIMIT 100';
+    query += ' ORDER BY created_at DESC LIMIT 100';
 
-  const [rows] = await db.query(query, params);
-  return rows;
+    const [rows] = await db.query(query, params);
+    return rows;
 };
