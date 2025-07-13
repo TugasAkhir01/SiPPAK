@@ -1,6 +1,7 @@
 const Violation = require('../models/violationModel');
 const reportExportModel = require('../models/reportExportModel');
 const path = require('path');
+const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
@@ -247,13 +248,31 @@ exports.exportReport = async (req, res) => {
         console.log(`[EXPORT] Checking file: ${fileSourcePath}`);
 
         if (fileField && fs.existsSync(fileSourcePath)) {
-            try {
-                const result = await mammoth.extractRawText({ path: fileSourcePath });
-                const fileText = result.value || '[File kosong]';
-                doc.text(fileText.trim());
-            } catch (extractErr) {
-                console.error('[EXPORT] Gagal membaca file DOCX:', extractErr);
-                doc.text('Gagal membaca isi file');
+            const ext = path.extname(fileSourcePath).toLowerCase();
+
+            if (ext === '.docx') {
+                try {
+                    const result = await mammoth.extractRawText({ path: fileSourcePath });
+                    const fileText = result.value || '[File kosong]';
+                    doc.text(fileText.trim());
+                } catch (extractErr) {
+                    console.error('[EXPORT] Gagal membaca file DOCX:', extractErr);
+                    doc.text('Gagal membaca isi file DOCX');
+                }
+            } else if (ext === '.pdf') {
+                try {
+                    const dataBuffer = fs.readFileSync(fileSourcePath);
+                    const data = await pdfParse(dataBuffer);
+                    const pdfText = data.text || '[PDF kosong]';
+                    doc.text(pdfText.trim());
+                } catch (pdfErr) {
+                    console.error('[EXPORT] Gagal membaca file PDF:', pdfErr);
+                    doc.text('Gagal membaca isi file PDF');
+                }
+            } else if (ext === '.doc') {
+                doc.text('File .doc terdeteksi, tetapi tidak didukung untuk dibaca. Harap unggah file .docx.');
+            } else {
+                doc.text(`File berformat ${ext} tidak didukung untuk ditampilkan.`);
             }
         } else {
             doc.text('File tidak ditemukan');
@@ -262,9 +281,31 @@ exports.exportReport = async (req, res) => {
         doc.end();
 
         stream.on('finish', async () => {
-            console.log('[EXPORT] PDF finished, returning file...');
-            await reportExportModel.saveExportLog(fileName); // tetap disimpan
-            res.download(filePath);
+            console.log('[EXPORT] PDF finished. Checking file availability...');
+
+            try {
+                // Pastikan file benar-benar tersedia dulu
+                await fs.promises.access(filePath, fs.constants.F_OK);
+
+                await reportExportModel.saveExportLog(fileName);
+                res.setHeader('Content-Type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+                res.sendFile(fileName, {
+                    root: exportDir, // yaitu path.join(__dirname, '../exports')
+                    headers: {
+                        'Content-Type': 'application/pdf',
+                        'Content-Disposition': `attachment; filename="${fileName}"`
+                    }
+                }, (err) => {
+                    if (err) {
+                        console.error('[EXPORT] Gagal mengirim file PDF:', err);
+                        return res.status(500).json({ message: 'Gagal mengunduh file hasil export' });
+                    }
+                });
+            } catch (fileErr) {
+                console.error('[EXPORT] File tidak ditemukan setelah selesai ditulis:', fileErr);
+                res.status(500).json({ message: 'File export PDF tidak ditemukan' });
+            }
         });
 
         stream.on('error', (err) => {

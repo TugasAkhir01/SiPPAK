@@ -51,4 +51,3 @@ exports.getMe = (req, res) => {
         user
     });
 };
-
