@@ -1,8 +1,8 @@
 const express = require('express');
-const upload = require('../middleware/uploadMiddleware');
 const router = express.Router();
-const controller = require('../controllers/violationController');
+const upload = require('../middleware/uploadMiddleware');
 const { verifyToken } = require('../middleware/authMiddleware');
+const controller = require('../controllers/violationController');
 
 router.post('/upload', verifyToken, upload.single('file'), (req, res) => {
     if (!req.file) {
@@ -17,17 +17,23 @@ router.post('/upload', verifyToken, upload.single('file'), (req, res) => {
         }
     });
 });
+
 router.get('/violations', verifyToken, controller.getAll);
+
 router.post(
     '/violations',
     verifyToken,
     upload.fields([
-        { name: 'hasil_sidang', maxCount: 1 },
-        { name: 'notulensi', maxCount: 1 }
+        { name: 'hasil_sidang_path', maxCount: 1 },
+        { name: 'notulensi_path', maxCount: 1 },
+        { name: 'photo_path', maxCount: 1 }
     ]),
     controller.createWithUpload
 );
+
 router.get('/violations/:id', verifyToken, controller.getById);
+router.get('/violations/student/:nim', verifyToken, controller.getByNIM);
+
 router.put(
     '/violations/:id',
     verifyToken,
@@ -38,7 +44,11 @@ router.put(
     ]),
     controller.update
 );
+
+router.put('/violations/:id/status', verifyToken, controller.updateStatusApproval);
+
 router.delete('/violations/:id', verifyToken, controller.delete);
-router.get('/violations/student/:nim', verifyToken, controller.getByNIM);
+
+router.post('/violations/export', verifyToken, controller.exportReport);
 
 module.exports = router;

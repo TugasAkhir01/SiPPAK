@@ -1,5 +1,9 @@
 const db = require('../config/db');
 
 exports.saveExportLog = async (filename) => {
-  await db.query('INSERT INTO report_exports (filename) VALUES (?)', [filename]);
+    const [result] = await db.promise().query(
+        'INSERT INTO report_exports (filename, created_at) VALUES (?, NOW())',
+        [filename]
+    );
+    return result.insertId;
 };

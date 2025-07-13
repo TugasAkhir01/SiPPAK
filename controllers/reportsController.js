@@ -1,3 +1,4 @@
+const mammoth = require('mammoth');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
