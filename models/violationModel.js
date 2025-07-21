@@ -25,7 +25,7 @@ exports.getByNIM = (nim, cb) => {
     `, [nim], cb);
 };
 
-exports.create = async (mahasiswa, pelanggaran) => {
+exports.create = async (mahasiswa, pelanggaran, cb) => {
     db.query('SELECT id FROM mahasiswa WHERE nim = ?', [mahasiswa.nim], (err, result) => {
         if (err) return cb(err);
 
