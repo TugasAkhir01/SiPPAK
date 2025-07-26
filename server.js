@@ -46,6 +46,13 @@ app.all('*', (req, res) => {
   res.status(404).json({ message: `Route ${req.originalUrl} tidak ditemukan.` });
 });
 
+console.log('📂 Daftar route yang aktif:');
+app._router.stack
+  .filter(r => r.route && r.route.path)
+  .forEach(r => {
+    console.log(`${Object.keys(r.route.methods).join(',').toUpperCase()} ${r.route.path}`);
+  });
+
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
