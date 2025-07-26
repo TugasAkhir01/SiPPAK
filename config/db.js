@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
