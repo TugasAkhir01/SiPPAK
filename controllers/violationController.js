@@ -6,7 +6,7 @@ const mammoth = require('mammoth');
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const { moveFileToFinalLocation } = require('../helpers/fileHelper');
-const db = require('../config/db');
+const { db } = require('../config/db');
 
 exports.getAll = (req, res) => {
     Violation.getAll((err, result) => {
