@@ -36,7 +36,7 @@ app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/report', express.static(path.join(__dirname, 'exports')));
+app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/api', violationRoutes);
 
 connectToDB();
