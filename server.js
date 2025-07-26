@@ -10,7 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const violationRoutes = require('./routes/violationRoutes');
 const reportRoutes = require('./routes/reports');
-const db = require('./config/db');
+const { db, connectToDB } = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
