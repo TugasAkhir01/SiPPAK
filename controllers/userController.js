@@ -66,7 +66,7 @@ exports.updateUserPhoto = (req, res) => {
     if (!photo) return res.status(400).json({ message: 'Foto tidak ditemukan.' });
 
     // Ambil foto lama
-    const db = require('../config/db');
+    const { db } = require('../config/db');
     db.query("SELECT photo FROM users WHERE id = ?", [id], (err, results) => {
         if (err) return res.status(500).json({ message: 'Gagal ambil user', error: err });
 
