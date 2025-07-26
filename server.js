@@ -10,7 +10,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const violationRoutes = require('./routes/violationRoutes');
 const reportRoutes = require('./routes/reports');
-const { db, connectToDB } = require('./config/db');
+const { connectToDB } = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -41,8 +41,6 @@ app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/api/report', reportRoutes);
 app.use('/api/violations', violationRoutes);
 
-connectToDB();
-
 app.all('*', (req, res) => {
   res.status(404).json({ message: `Route ${req.originalUrl} tidak ditemukan.` });
 });
@@ -54,7 +52,17 @@ app._router.stack
     console.log(`${Object.keys(r.route.methods).join(',').toUpperCase()} ${r.route.path}`);
   });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await connectToDB();
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ Gagal connect ke DB:', err);
+    process.exit(1);
+  }
+}
+
+startServer();
 
