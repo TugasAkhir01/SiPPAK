@@ -1,29 +1,30 @@
 const multer = require('multer');
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
-// Middleware multer dinamis berdasarkan ?type
-function dynamicUpload(req, res, next) {
-  const type = req.query.type || 'default';
-  const folder = path.join('uploads', 'temp');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const profilePath = 'uploads/profile';
+    fs.mkdirSync(profilePath, { recursive: true });
+    cb(null, profilePath);
+  },
+  filename: (req, file, cb) => {
+    const timestamp = Date.now();
+    const ext = path.extname(file.originalname);
+    cb(null, `${timestamp}${ext}`);
+  }
+});
 
-  fs.mkdirSync(folder, { recursive: true });
+const allowedImageTypes = ['image/png', 'image/jpeg', 'image/jpg'];
 
-  const storage = multer.diskStorage({
-    destination: folder,
-    filename: (req, file, cb) => {
-      const timestamp = Date.now();
-      const ext = path.extname(file.originalname);
-      cb(null, `${type}_${timestamp}${ext}`);
-    }
-  });
+const fileFilter = (req, file, cb) => {
+  if (allowedImageTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Format gambar tidak didukung. Hanya PNG, JPG, JPEG yang diizinkan.'), false);
+  }
+};
 
-  const upload = multer({ storage });
-  const singleUpload = upload.single('file');
-  singleUpload(req, res, function (err) {
-    if (err instanceof multer.MulterError || err) {
-      return res.status(400).json({ error: 'Upload gagal', detail: err.message });
-    }
-    next();
-  });
-}
+const uploadProfile = multer({ storage, fileFilter });
+
+module.exports = uploadProfile;
