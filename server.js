@@ -21,7 +21,14 @@ if (!fs.existsSync(uploadDir)) {
   console.log('Folder uploads berhasil dibuat');
 }
 
-app.use(cors());
+const corsOptions = {
+  origin: 'https://sippak.up.railway.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.use(bodyParser.json());
