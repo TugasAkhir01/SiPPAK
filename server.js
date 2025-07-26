@@ -31,6 +31,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/report', express.static(path.join(__dirname, 'exports')));
 app.use('/api', violationRoutes);
 
+connectToDB();
+
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
