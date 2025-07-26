@@ -12,7 +12,6 @@ const violationRoutes = require('./routes/violationRoutes');
 const reportRoutes = require('./routes/reports');
 const { db, connectToDB } = require('./config/db');
 
-const app = express();
 const PORT = process.env.PORT || 3001;
 
 const uploadDir = path.join(__dirname, 'uploads');
