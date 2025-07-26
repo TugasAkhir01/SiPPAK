@@ -18,10 +18,10 @@ router.post('/upload', verifyToken, upload.single('file'), (req, res) => {
     });
 });
 
-router.get('/violations', verifyToken, controller.getAll);
+router.get('/', verifyToken, controller.getAll);
 
 router.post(
-    '/violations',
+    '/',
     verifyToken,
     upload.fields([
         { name: 'hasil_sidang_path', maxCount: 1 },
@@ -31,11 +31,11 @@ router.post(
     controller.createWithUpload
 );
 
-router.get('/violations/:id', verifyToken, controller.getById);
-router.get('/violations/student/:nim', verifyToken, controller.getByNIM);
+router.get('/:id', verifyToken, controller.getById);
+router.get('/student/:nim', verifyToken, controller.getByNIM);
 
 router.put(
-    '/violations/:id',
+    '/:id',
     verifyToken,
     upload.fields([
         { name: 'hasil_sidang_path', maxCount: 1 },
@@ -45,10 +45,10 @@ router.put(
     controller.update
 );
 
-router.put('/violations/:id/status', verifyToken, controller.updateStatusApproval);
+router.put('/:id/status', verifyToken, controller.updateStatusApproval);
 
-router.delete('/violations/:id', verifyToken, controller.delete);
+router.delete('/:id', verifyToken, controller.delete);
 
-router.post('/violations/export', verifyToken, controller.exportReport);
+router.post('/export', verifyToken, controller.exportReport);
 
 module.exports = router;
