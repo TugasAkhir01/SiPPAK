@@ -8,12 +8,18 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
-db.connect((err) => {
-  if (err) {
-    console.error('❌ DB Error:', err.message);
-  } else {
-    console.log('✅ Connected to Railway DB!');
-  }
-});
+function connectToDB() {
+  return new Promise((resolve, reject) => {
+    db.connect((err) => {
+      if (err) {
+        console.error('❌ DB Error:', err.message);
+        reject(err);
+      } else {
+        console.log('✅ Connected to Railway DB!');
+        resolve();
+      }
+    });
+  });
+}
 
-module.exports = db;
+module.exports = { db, connectToDB };
