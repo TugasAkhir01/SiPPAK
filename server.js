@@ -12,6 +12,7 @@ const violationRoutes = require('./routes/violationRoutes');
 const reportRoutes = require('./routes/reports');
 const { db, connectToDB } = require('./config/db');
 
+const app = express();
 const PORT = process.env.PORT || 3001;
 
 const uploadDir = path.join(__dirname, 'uploads');
@@ -19,6 +20,17 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir);
   console.log('Folder uploads berhasil dibuat');
 }
+
+const corsOptions = {
+  origin: 'https://sippak.up.railway.app',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 app.use((req, res, next) => {
   if (req.method === 'OPTIONS') {
@@ -29,18 +41,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-const corsOptions = {
-  origin: 'https://sippak.up.railway.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-
-const app = express();
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 app.use(bodyParser.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
