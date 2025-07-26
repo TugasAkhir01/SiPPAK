@@ -20,6 +20,10 @@ router.post('/upload', verifyToken, upload.single('file'), (req, res) => {
 
 router.get('/', verifyToken, controller.getAll);
 
+router.get('/student/:nim', verifyToken, controller.getByNIM);
+
+router.get('/:id', verifyToken, controller.getById);
+
 router.post(
     '/',
     verifyToken,
@@ -31,8 +35,6 @@ router.post(
     controller.createWithUpload
 );
 
-router.get('/:id', verifyToken, controller.getById);
-router.get('/student/:nim', verifyToken, controller.getByNIM);
 
 router.put(
     '/:id',
