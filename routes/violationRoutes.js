@@ -4,18 +4,18 @@ const upload = require('../middleware/uploadMiddleware');
 const { verifyToken } = require('../middleware/authMiddleware');
 const controller = require('../controllers/violationController');
 
-router.post('/upload', verifyToken, dynamicUpload, (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'File tidak ditemukan di request' });
-  }
-
-  res.json({
-    message: 'Upload sementara berhasil',
-    file: {
-      name: req.file.filename,
-      tempPath: req.file.path
+router.post('/upload', verifyToken, upload.single('file'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'Gagal upload file' });
     }
-  });
+
+    res.json({
+        message: 'Upload sementara berhasil',
+        file: {
+            name: req.file.filename,
+            tempPath: req.file.path,
+        }
+    });
 });
 
 router.get('/', verifyToken, controller.getAll);
