@@ -42,10 +42,11 @@ app.use('/api/violations', violationRoutes);
 
 connectToDB();
 
+app.all('*', (req, res) => {
+  res.status(404).json({ message: `Route ${req.originalUrl} tidak ditemukan.` });
+});
+
 app.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
 });
 
-app.all('*', (req, res) => {
-  res.status(404).json({ message: `Route ${req.originalUrl} tidak ditemukan.` });
-});
