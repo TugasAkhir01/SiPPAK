@@ -1,4 +1,4 @@
-const db = require('../config/db');
+const { db } = require('../config/db');
 
 exports.saveExportLog = async (filename) => {
     const [result] = await db.promise().query(
