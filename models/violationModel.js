@@ -92,3 +92,22 @@ exports.update = (id, data, cb) => {
 exports.delete = (id, cb) => {
   db.query('DELETE FROM violations WHERE id = ?', [id], cb);
 };
+
+exports.getViolationsByDate = (start, end) => {
+    return new Promise((resolve, reject) => {
+        let query = 'SELECT * FROM violations';
+        let params = [];
+
+        if (start && end) {
+            query += ' WHERE DATE(created_at) BETWEEN ? AND ?';
+            params.push(start, end);
+        }
+
+        query += ' ORDER BY created_at DESC LIMIT 100';
+
+        db.query(query, params, (err, results) => {
+            if (err) return reject(err);
+            resolve(results);
+        });
+    });
+};
