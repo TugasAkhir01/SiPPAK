@@ -38,7 +38,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/exports', express.static(path.join(__dirname, 'exports')));
 app.use('/api/report', reportRoutes);
-app.use('/api', violationRoutes);
+app.use('/api/violations', violationRoutes);
 
 connectToDB();
 
