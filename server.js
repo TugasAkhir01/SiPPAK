@@ -20,6 +20,16 @@ if (!fs.existsSync(uploadDir)) {
   console.log('Folder uploads berhasil dibuat');
 }
 
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    res.header('Access-Control-Allow-Origin', 'https://sippak.up.railway.app');
+    res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 const corsOptions = {
   origin: 'https://sippak.up.railway.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
