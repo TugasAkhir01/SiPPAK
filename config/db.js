@@ -1,7 +1,3 @@
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').config();
-}
-
 const mysql = require('mysql2');
 
 const db = mysql.createConnection({
@@ -12,21 +8,12 @@ const db = mysql.createConnection({
   database: process.env.DB_NAME,
 });
 
-function connectToDB() {
-  console.log('Connecting to DB with:', {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    user: process.env.DB_USER,
-    database: process.env.DB_NAME,
-  });
+db.connect((err) => {
+  if (err) {
+    console.error('❌ DB Error:', err.message);
+  } else {
+    console.log('✅ Connected to Railway DB!');
+  }
+});
 
-  db.connect((err) => {
-    if (err) {
-      console.error('❌ DB Error:', err.message);
-    } else {
-      console.log('✅ Connected to Railway DB!');
-    }
-  });
-}
-
-module.exports = { db, connectToDB };
+module.exports = db;
