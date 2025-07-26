@@ -13,7 +13,7 @@ const reportRoutes = require('./routes/reports');
 const { connectToDB } = require('./config/db');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8080;
 
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
