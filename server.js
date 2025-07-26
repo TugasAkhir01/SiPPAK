@@ -31,13 +31,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/report', express.static(path.join(__dirname, 'exports')));
 app.use('/api', violationRoutes);
 
-db.connect((err) => {
-  if (err) {
-    console.error('Database connection failed:', err);
-    return;
-  }
-  console.log('Connected to MySQL');
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
 });
