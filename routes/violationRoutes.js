@@ -19,10 +19,8 @@ router.post('/upload', verifyToken, upload.single('file'), (req, res) => {
 });
 
 router.get('/', verifyToken, controller.getAll);
-
-router.get('/:id', verifyToken, controller.getById);
-
 router.get('/student/:nim', verifyToken, controller.getByNIM);
+router.get('/:id', verifyToken, controller.getById);
 
 router.post(
     '/',
