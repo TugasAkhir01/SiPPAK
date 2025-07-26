@@ -15,13 +15,19 @@ exports.login = (req, res) => {
         if (results.length === 0) return res.status(404).json({ message: 'User not found' });
 
         const user = results[0];
+
+        // Handle password kosong
+        if (!user.password) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
         const match = await bcrypt.compare(password, user.password);
         if (!match) return res.status(401).json({ message: 'Invalid credentials' });
 
         const token = jwt.sign({
             id: user.id,
             email: user.email,
-            role: user.role
+            role: user.role_name // <- ini juga harus benar
         }, process.env.SECRET_KEY, { expiresIn: '5h' });
 
         res.status(200).json({
