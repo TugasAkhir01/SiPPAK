@@ -32,12 +32,14 @@ exports.getByNIM = (req, res) => {
 exports.createWithUpload = async (req, res) => {
     try {
         let mahasiswa, pelanggaran;
-
+        console.log("BODY MAHASISWA:", req.body.mahasiswa);
         try {
             mahasiswa = JSON.parse(req.body.mahasiswa);
+            console.log("PARSED NAMA:", parsed.nama);
             pelanggaran = JSON.parse(req.body.pelanggaran);
         } catch (err) {
             return res.status(400).json({ error: 'Format JSON mahasiswa atau pelanggaran tidak valid' });
+            console.error("GAGAL PARSE mahasiswa:", e.message);
         }
 
         if (!mahasiswa || !mahasiswa.nim) return res.status(400).json({ error: 'Data mahasiswa tidak lengkap' });
