@@ -35,7 +35,6 @@ exports.createWithUpload = async (req, res) => {
         console.log("BODY MAHASISWA:", req.body.mahasiswa);
         try {
             mahasiswa = JSON.parse(req.body.mahasiswa);
-            console.log("PARSED NAMA:", parsed.nama);
             pelanggaran = JSON.parse(req.body.pelanggaran);
         } catch (err) {
             console.error("❌ JSON parse error:", err.message);
