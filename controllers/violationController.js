@@ -39,8 +39,6 @@ exports.createWithUpload = async (req, res) => {
             pelanggaran = JSON.parse(req.body.pelanggaran);
         } catch (err) {
             console.error("❌ JSON parse error:", err.message);
-            console.error("🧪 Raw mahasiswa:", req.body.mahasiswa);
-            console.error("🧪 Raw pelanggaran:", req.body.pelanggaran);
             return res.status(400).json({ error: 'Format JSON mahasiswa atau pelanggaran tidak valid' });
         }
 
