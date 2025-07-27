@@ -94,65 +94,105 @@ exports.createWithUpload = async (req, res) => {
 };
 
 exports.update = (req, res) => {
-    let data;
+    let pelanggaranData;
 
     try {
-        data = JSON.parse(req.body.pelanggaran);
+        pelanggaranData = JSON.parse(req.body.pelanggaran);
     } catch (e) {
         return res.status(400).json({ error: "Format JSON pelanggaran tidak valid" });
     }
 
-    // ⬇️ Pindahkan file jika diberikan
+    let mahasiswaData = null;
+    try {
+        if (req.body.mahasiswa) {
+            mahasiswaData = JSON.parse(req.body.mahasiswa);
+        }
+    } catch (e) {
+        return res.status(400).json({ error: "Format JSON mahasiswa tidak valid" });
+    }
+
+    // Pindahkan file jika diberikan
     if (req.body.hasil_sidang_path) {
         const tempPath = path.join('uploads', 'temp', req.body.hasil_sidang_path);
         const result = moveFileToFinalLocation(tempPath, 'hasil_sidang');
-        if (result) data.hasil_sidang = result;
+        if (result) pelanggaranData.hasil_sidang = result;
     }
 
     if (req.body.notulensi_path) {
         const tempPath = path.join('uploads', 'temp', req.body.notulensi_path);
         const result = moveFileToFinalLocation(tempPath, 'notulensi');
-        if (result) data.notulensi = result;
+        if (result) pelanggaranData.notulensi = result;
     }
 
     if (req.body.photo_path) {
         const tempPath = path.join('uploads', 'temp', req.body.photo_path);
         const result = moveFileToFinalLocation(tempPath, 'photo');
-        if (result) data.foto = result;
+        if (result) pelanggaranData.foto = result;
     }
 
-    Violation.update(req.params.id, data, (err) => {
+    // Ambil data pelanggaran untuk mengetahui mahasiswa_id
+    Violation.getById(req.params.id, (err, result) => {
         if (err) return res.status(500).send(err);
+        if (!result || result.length === 0) return res.status(404).json({ error: 'Data tidak ditemukan' });
 
-        Violation.getById(req.params.id, (err, result) => {
-            if (err) return res.status(500).send(err);
-            if (!result || result.length === 0) return res.status(404).json({ error: 'Data tidak ditemukan' });
+        const existing = result[0];
 
-            const row = result[0];
+        // ⬇️ Update data mahasiswa jika dikirim
+        if (mahasiswaData) {
+            const updateMhsSQL = `
+                UPDATE mahasiswa SET nama = ?, nim = ?, jurusan = ?, semester = ?
+                WHERE id = ?
+            `;
+            db.query(updateMhsSQL, [
+                mahasiswaData.nama,
+                mahasiswaData.nim,
+                mahasiswaData.jurusan,
+                mahasiswaData.semester,
+                existing.mahasiswa_id
+            ], (err) => {
+                if (err) return res.status(500).json({ error: 'Gagal update data mahasiswa' });
 
-            res.json({
-                message: 'Data Pelanggaran berhasil diupdate',
-                data: {
-                    mahasiswa: {
-                        nama: row.nama,
-                        nim: row.nim,
-                        jurusan: row.jurusan,
-                        semester: row.semester
-                    },
-                    pelanggaran: {
-                        id: row.id,
-                        id_kasus: row.id_kasus,
-                        jenis_kasus: row.jenis_kasus,
-                        status: row.status,
-                        hasil_sidang: row.hasil_sidang,
-                        notulensi: row.notulensi,
-                        foto: row.foto,
-                        status_approval: row.status_approval,
-                        type: row.type
-                    }
-                }
+                lanjutUpdatePelanggaran();
             });
-        });
+        } else {
+            lanjutUpdatePelanggaran();
+        }
+
+        function lanjutUpdatePelanggaran() {
+            Violation.update(req.params.id, pelanggaranData, (err) => {
+                if (err) return res.status(500).send(err);
+
+                Violation.getById(req.params.id, (err, result) => {
+                    if (err) return res.status(500).send(err);
+                    if (!result || result.length === 0) return res.status(404).json({ error: 'Data tidak ditemukan' });
+
+                    const row = result[0];
+
+                    res.json({
+                        message: 'Data Pelanggaran berhasil diupdate',
+                        data: {
+                            mahasiswa: {
+                                nama: row.nama,
+                                nim: row.nim,
+                                jurusan: row.jurusan,
+                                semester: row.semester
+                            },
+                            pelanggaran: {
+                                id: row.id,
+                                id_kasus: row.id_kasus,
+                                jenis_kasus: row.jenis_kasus,
+                                status: row.status,
+                                hasil_sidang: row.hasil_sidang,
+                                notulensi: row.notulensi,
+                                foto: row.foto,
+                                status_approval: row.status_approval,
+                                type: row.type
+                            }
+                        }
+                    });
+                });
+            });
+        }
     });
 };
 
